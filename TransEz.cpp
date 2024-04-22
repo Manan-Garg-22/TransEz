@@ -83,6 +83,8 @@ void PrintWaterMap()
 {
     createWaterMap();
 
+    cout << endl << endl;
+
     for(ll x = 0 ; x < 2e5 + 1 ; x++)
     {
         if(Water[x].empty())
@@ -225,6 +227,44 @@ void WaterRoute()
 
     cout << "\nTotal Distance Covered : " << distanceTotal << " KiloMeters. " << endl << endl;
 
+    cout << "Enter Your Username To Save Changes to Your Log : ";
+
+    string name;
+
+    cin >> name;
+
+    name += ".txt";
+
+    ifstream file(name);
+
+    string word;
+
+    vector<string> info;
+
+    ll temp = 0;
+
+    while(file >> word)
+    {
+        temp++;
+
+        info.push_back(word);
+    }
+
+
+    ofstream file2(name);
+
+    for(auto i : info)
+        file2 << i << ' ';
+
+    file2 << "### Water :: ";
+
+    for(auto i : path)
+        file2 << mapping[i] << "-> ";
+    
+    file2 << "Distance " << distanceTotal;
+
+    file2 << " KiloMeters " << "### " << endl << endl;
+
     pause;
 
     clear;
@@ -268,6 +308,8 @@ void createLandMap()
 void PrintLandMap()
 {
     createLandMap();
+
+    cout << endl << endl;
 
     for(ll x = 0 ; x < 2e5 + 1 ; x++)
     {
@@ -411,6 +453,44 @@ void LandRoute()
 
     cout << "\nTotal Distance Covered : " << distanceTotal << " KiloMeters. " << endl << endl;
 
+    cout << "Enter Your Username To Save Changes to Your Log : ";
+
+    string name;
+
+    cin >> name;
+
+    name += ".txt";
+
+    ifstream file(name);
+
+    string word;
+
+    vector<string> info;
+
+    ll temp = 0;
+
+    while(file >> word)
+    {
+        temp++;
+
+        info.push_back(word);
+    }
+
+
+    ofstream file2(name);
+
+    for(auto i : info)
+        file2 << i << ' ';
+
+    file2 << "### Land :: ";
+
+    for(auto i : path)
+        file2 << mapping[i] << "-> ";
+    
+    file2 << "Distance " << distanceTotal << " KiloMeters ";
+
+    file2 << "### " << endl << endl;
+
     pause;
 
     clear;
@@ -454,6 +534,8 @@ void createAirMap()
 void PrintAirMap()
 {
     createAirMap();
+        
+    cout << endl << endl;
     
     for(ll x = 0 ; x < 2e5 + 1 ; x++)
     {
@@ -597,14 +679,103 @@ void AirRoute()
 
     cout << "\nTotal Distance Covered : " << distanceTotal << " KiloMeters. " << endl << endl;
 
+    cout << "Enter Your Username To Save Changes to Your Log : ";
+
+    string name;
+
+    cin >> name;
+
+    name += ".txt";
+
+    ifstream file(name);
+
+    string word;
+
+    vector<string> info;
+
+    ll temp = 0;
+
+    while(file >> word)
+    {
+        temp++;
+
+        info.push_back(word);
+    }
+
+
+    ofstream file2(name);
+
+    for(auto i : info)
+        file2 << i << ' ';
+
+    file2 << "### Air :: ";
+
+    for(auto i : path)
+        file2 << mapping[i] << "-> ";
+    
+    file2 << "Distance " << distanceTotal << " KiloMeters ";
+
+    file2 << "### " << endl << endl;
+
     pause;
 
     clear;
 }
 
+bool ReadCredentials(string n, string p);
+
 void TravelLog()
 {
-    ;
+    string name, password;
+
+    cout << "\n\nEnter The Name Of the User : ";
+
+    cin >> name;
+
+    cout << "\nEnter Password : ";
+
+    cin >> password;
+
+    if(!ReadCredentials(name, password))
+    {
+        cout << "Sorry! Invalid Credentials...";
+
+        pause;
+
+        clear;
+    }
+
+    else
+    {
+        cout << "\nPrinting Travel History :- \n\n";
+
+        string filename = name;
+
+        filename += ".txt";
+
+        ifstream file(filename);
+
+        string word;
+
+        vector<string> info;
+
+        ll temp = 0;
+
+        while(file >> word)
+        {
+            temp++;
+
+            info.push_back(word);
+        }
+
+        for(auto i : info)
+        {            
+            cout << i << ' ';
+
+            if(i.find('#') != string :: npos)
+                cout << endl << endl;
+        }
+    }
 }
 
 void Menu();
@@ -644,8 +815,6 @@ void CustomerMenu()
 
     else
         Menu();
-
-    CustomerMenu();
 }
 
 void AdministratorMenu()
@@ -698,8 +867,6 @@ void AdministratorMenu()
 
     else
         Menu();
-
-    AdministratorMenu();
 }
 
 void Menu()
@@ -880,6 +1047,16 @@ void Signup()
         cout << "\nCongratulations! You Have Been Successfully Signed...\n\n";
 
         WriteCredentials(username, passwd);
+
+        fstream file;
+
+        string filename = username;
+
+        filename += ".txt";
+
+        file.open(filename, ios :: out);
+
+        file.close();
 
         pause;
     }

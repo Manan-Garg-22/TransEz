@@ -1,2 +1,2 @@
-$ Delhi Gujarat 1000 
- $ Delhi Noida 2000
+$ Delhi Mumbai 4000 
+ $ Mumbai Chennai 3000

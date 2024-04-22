@@ -1,2 +1,2 @@
-$ China India 5000 
- $ India Australia 10000
+$ Delhi Hyderabad 1000 
+ $ Delhi Mumbai 2000
