@@ -24,7 +24,7 @@ map<ll, string> mapping;
 
 ll Encrypt(string data)
 {
-    long long ModValue = 10139;
+    long long ModValue = 99991;
 
     long long Encrypted = 0;
     
@@ -44,7 +44,7 @@ ll Encrypt(string data)
 
 void MainWindow();
 
-void WaterMap()
+void createWaterMap()
 {
     Water.assign(2e5 + 1, vector<pair<ll, ll>> ());
 
@@ -77,6 +77,11 @@ void WaterMap()
         Water[encrypt1].push_back(make_pair(encrypt2, stoi(info[x + 3])));
         Water[encrypt2].push_back(make_pair(encrypt1, stoi(info[x + 3])));
     }
+}
+
+void PrintWaterMap()
+{
+    createWaterMap();
 
     for(ll x = 0 ; x < 2e5 + 1 ; x++)
     {
@@ -89,10 +94,18 @@ void WaterMap()
             cout << mapping[i.first] << " : " << i.second << " KiloMeters." << endl;
         cout << endl;
     }
+
+    cout << endl;
+
+    pause;
+
+    clear;
 }
 
 void EditWaterMap()
 {
+    createWaterMap();
+
     string city1, city2;
 
     ll distance;
@@ -134,19 +147,90 @@ void EditWaterMap()
 
 void WaterRoute()
 {
+    createWaterMap();
+
     string start, destination;
 
     cout << "\nEnter The Start & End Point : ";
 
     cin >> start >> destination;
+
+    queue<ll> q;
+
+    vector<bool> vis;
+
+    vector<ll> lvl, predecessor;
+
+    vis.assign(200001,false);
+
+    lvl.assign(200001,0);
+
+    predecessor.assign(200001,0);
+
+    ll root = Encrypt(start);
+
+    q.push(root);
+
+    vis[root] = true;
+
+    while(!q.empty())
+    {
+        ll current = q.front();
+
+        q.pop();
+
+        vis[current] = true;
+
+        for(auto neighbour : Water[current])
+            if(!vis[neighbour.first])
+            {
+                lvl[neighbour.first] = 1 + lvl[current];
+
+                q.push(neighbour.first);
+
+                predecessor[neighbour.first] = current;
+                
+                vis[neighbour.first] = true;
+            }
+    }
+
+    ll endd = Encrypt(destination);
+    
+    cout << endl << "Shortest Distance Between " << start << " & " << destination << " covers : " << lvl[endd] + 1 << " Locations. " << endl << endl;
+
+    vector <ll> path;
+
+    path.push_back(endd);
+
+    while(predecessor[endd])
+    {
+        path.push_back(predecessor[endd]);
+        endd = predecessor[endd];
+    }
+
+    reverse(path.begin(), path.end());
+
+    for(ll x = 0 ; x < path.size() ; x++)
+        cout << x + 1 << ". " << mapping[path[x]] << endl << endl;        
+
+    ll distanceTotal = 0;
+
+    for(ll x = 0 ; x < path.size() - 1 ; x++)
+        for(auto i : Water[path[x]])
+            if(i.first == path[x + 1])
+            {
+                distanceTotal += i.second;
+                break;
+            }
+
+    cout << "\nTotal Distance Covered : " << distanceTotal << " KiloMeters. " << endl << endl;
+
+    pause;
+
+    clear;
 }
 
-void WaterCostE()
-{
-    ;
-}
-
-void LandMap()
+void createLandMap()
 {
     Water.assign(2e5 + 1, vector<pair<ll, ll>> ());
 
@@ -176,13 +260,18 @@ void LandMap()
         mapping[encrypt1] = info[x + 1];
         mapping[encrypt2] = info[x + 2];
 
-        Water[encrypt1].push_back(make_pair(encrypt2, stoi(info[x + 3])));
-        Water[encrypt2].push_back(make_pair(encrypt1, stoi(info[x + 3])));
+        Land[encrypt1].push_back(make_pair(encrypt2, stoi(info[x + 3])));
+        Land[encrypt2].push_back(make_pair(encrypt1, stoi(info[x + 3])));
     }
+}
+
+void PrintLandMap()
+{
+    createLandMap();
 
     for(ll x = 0 ; x < 2e5 + 1 ; x++)
     {
-        if(Water[x].empty())
+        if(Land[x].empty())
             continue;   
 
         cout << "Cities Connected With : " << mapping[x] << " : - \n\n";
@@ -191,10 +280,18 @@ void LandMap()
             cout << mapping[i.first] << " : " << i.second << " KiloMeters." << endl;
         cout << endl;
     }
+
+    cout << endl;
+
+    pause;
+
+    clear;
 }
 
 void EditLandMap()
 {
+    createLandMap();
+
     string city1, city2;
 
     ll distance;
@@ -236,17 +333,92 @@ void EditLandMap()
 
 void LandRoute()
 {
-    ;
+    createLandMap();
+    
+    string start, destination;
+
+    cout << "\nEnter The Start & End Point : ";
+
+    cin >> start >> destination;
+
+    queue<ll> q;
+
+    vector<bool> vis;
+
+    vector<ll> lvl, predecessor;
+
+    vis.assign(200001,false);
+
+    lvl.assign(200001,0);
+
+    predecessor.assign(200001,0);
+
+    ll root = Encrypt(start);
+
+    q.push(root);
+
+    vis[root] = true;
+
+    while(!q.empty())
+    {
+        ll current = q.front();
+
+        q.pop();
+
+        vis[current] = true;
+
+        for(auto neighbour : Land[current])
+            if(!vis[neighbour.first])
+            {
+                lvl[neighbour.first] = 1 + lvl[current];
+
+                q.push(neighbour.first);
+
+                predecessor[neighbour.first] = current;
+                
+                vis[neighbour.first] = true;
+            }
+    }
+
+    ll endd = Encrypt(destination);
+    
+    cout << endl << "Shortest Distance Between " << start << " & " << destination << " covers : " << lvl[endd] + 1 << " Locations. " << endl << endl;
+
+    vector <ll> path;
+
+    path.push_back(endd);
+
+    while(predecessor[endd])
+    {
+        path.push_back(predecessor[endd]);
+        endd = predecessor[endd];
+    }
+
+    reverse(path.begin(), path.end());
+
+    for(ll x = 0 ; x < path.size() ; x++)
+        cout << x + 1 << ". " << mapping[path[x]] << endl << endl;        
+
+    ll distanceTotal = 0;
+
+    for(ll x = 0 ; x < path.size() - 1 ; x++)
+        for(auto i : Land[path[x]])
+            if(i.first == path[x + 1])
+            {
+                distanceTotal += i.second;
+                break;
+            }
+
+    cout << "\nTotal Distance Covered : " << distanceTotal << " KiloMeters. " << endl << endl;
+
+    pause;
+
+    clear;
 }
 
-void LandCostE()
+void createAirMap()
 {
-    ;
-}
-
-void AirMap()
-{
-    Water.assign(2e5 + 1, vector<pair<ll, ll>> ());
+    Air.assign(2e5 + 1, vector<pair<ll, ll>> ());
 
     ifstream file("air.txt");
 
@@ -274,25 +446,38 @@ void AirMap()
         mapping[encrypt1] = info[x + 1];
         mapping[encrypt2] = info[x + 2];
 
-        Water[encrypt1].push_back(make_pair(encrypt2, stoi(info[x + 3])));
-        Water[encrypt2].push_back(make_pair(encrypt1, stoi(info[x + 3])));
+        Air[encrypt1].push_back(make_pair(encrypt2, stoi(info[x + 3])));
+        Air[encrypt2].push_back(make_pair(encrypt1, stoi(info[x + 3])));
     }
+}
 
+void PrintAirMap()
+{
+    createAirMap();
+    
     for(ll x = 0 ; x < 2e5 + 1 ; x++)
     {
-        if(Water[x].empty())
+        if(Air[x].empty())
             continue;   
 
         cout << "Cities Connected With : " << mapping[x] << " : - \n\n";
 
-        for(auto i : Water[x])
+        for(auto i : Air[x])
             cout << mapping[i.first] << " : " << i.second << " KiloMeters." << endl;
         cout << endl;
     }
+
+    cout << endl;
+
+    pause;
+
+    clear;
 }
 
 void EditAirMap()
 {
+    createAirMap();
+
     string city1, city2;
 
     ll distance;
@@ -330,17 +515,91 @@ void EditAirMap()
         file2 << i << ' ';
 
     file2 << "$ " << city1 << ' ' << city2 << ' ' << distance << "\n";
-
 }
 
 void AirRoute()
 {
-    ;
-}
+    createAirMap();
+    
+    string start, destination;
 
-void AirCostE()
-{
-    ;
+    cout << "\nEnter The Start & End Point : ";
+
+    cin >> start >> destination;
+
+    queue<ll> q;
+
+    vector<bool> vis;
+
+    vector<ll> lvl, predecessor;
+
+    vis.assign(200001,false);
+
+    lvl.assign(200001,0);
+
+    predecessor.assign(200001,0);
+
+    ll root = Encrypt(start);
+
+    q.push(root);
+
+    vis[root] = true;
+
+    while(!q.empty())
+    {
+        ll current = q.front();
+
+        q.pop();
+
+        vis[current] = true;
+
+        for(auto neighbour : Air[current])
+            if(!vis[neighbour.first])
+            {
+                lvl[neighbour.first] = 1 + lvl[current];
+
+                q.push(neighbour.first);
+
+                predecessor[neighbour.first] = current;
+                
+                vis[neighbour.first] = true;
+            }
+    }
+
+        ll endd = Encrypt(destination);
+    
+    cout << endl << "Shortest Distance Between " << start << " & " << destination << " covers : " << lvl[endd] + 1 << " Locations. " << endl << endl;
+
+    vector <ll> path;
+
+    path.push_back(endd);
+
+    while(predecessor[endd])
+    {
+        path.push_back(predecessor[endd]);
+        endd = predecessor[endd];
+    }
+
+    reverse(path.begin(), path.end());
+
+    for(ll x = 0 ; x < path.size() ; x++)
+        cout << x + 1 << ". " << mapping[path[x]] << endl << endl;        
+
+    ll distanceTotal = 0;
+
+    for(ll x = 0 ; x < path.size() - 1 ; x++)
+        for(auto i : Air[path[x]])
+            if(i.first == path[x + 1])
+            {
+                distanceTotal += i.second;
+                break;
+            }
+
+    cout << "\nTotal Distance Covered : " << distanceTotal << " KiloMeters. " << endl << endl;
+
+    pause;
+
+    clear;
 }
 
 void TravelLog()
@@ -354,7 +613,7 @@ void CustomerMenu()
 {
     cout << "\n\nWelcome To Customer Menu: - \n\n";
 
-    cout << "1. Find a Route \n\n2. Cost Estimation \n\n3. Travel Log\n\n4. Quit...\n\n";
+    cout << "1. Find a Route \n\n2. Travel Log\n\n3. Quit...\n\n";
 
     cout << "Enter Your Choice : ";
 
@@ -381,28 +640,12 @@ void CustomerMenu()
     }
 
     else if(choice == 2)
-    {
-        cout << "\nWhich Mode of Travel? (Water / Air / Land) : ";
-
-        string type;
-
-        cin >> type;
-
-        if(type == "Water")
-            WaterCostE();
-        
-        else if(type == "Air")
-            AirCostE();
-        
-        else
-            LandCostE();
-    }
-
-    else if(choice == 3)
         TravelLog();
 
     else
         Menu();
+
+    CustomerMenu();
 }
 
 void AdministratorMenu()
@@ -426,13 +669,13 @@ void AdministratorMenu()
         cin >> type;
 
         if(type == "Water")
-            WaterMap();
+            PrintWaterMap();
         
         else if(type == "Air")
-            AirMap();
+            PrintAirMap();
         
         else
-            LandMap();
+            PrintLandMap();
     }
 
     else if(choice == 2)
@@ -455,6 +698,8 @@ void AdministratorMenu()
 
     else
         Menu();
+
+    AdministratorMenu();
 }
 
 void Menu()
@@ -463,22 +708,43 @@ void Menu()
 
     cout << "\nWhat is Your Role? ";
 
-    cout << "\n\n1. Customer\n\n2. Administrator";
+    cout << "\n\n1. Customer\n\n2. Administrator\n\n3. Quit\n\n";
+
+    cout << "\n\nEnter Your Choice : ";
 
     cin >> type;
 
     if(type == "Customer")
+    {
+        clear;
+
         CustomerMenu();
+    }
 
     else if(type == "Administrator")
+    {
+        clear;
+
         AdministratorMenu();
+    }
+
+    else if(type == "Quit")
+    {
+        clear;
+
+        MainWindow();
+    }
 
     else
-        cout << "\n\nInvalid Input...";
+    {
+        cout << "\n\nInvalid Input...\n\n";
 
-    clear;
+        pause;
 
-    Menu;
+        clear;
+    }
+
+    Menu();
 }
 
 bool ReadCredentials(string username, string passwd)
@@ -542,13 +808,13 @@ void WriteCredentials(string username, string passwd)
 
 void Quit()
 {
-    cout << "\nQuitting the Program...";
+    cout << "\nQuitting the Program...\n\n";
 
     cout << "\n\nThanks For Using Our Application!\n\n";
 
     pause;
 
-    clear;
+    abort();
 }
 
 void Login()
@@ -567,16 +833,18 @@ void Login()
 
     if(found)
     {
-        cout << "\nCongratulations! You have been Logged-In...";
+        cout << "\nCongratulations! You have been Logged-In...\n\n";
 
         pause;
+
+        clear;
 
         Menu();
     }
 
     else
     {
-        cout << "\nSorry! Try Again...";
+        cout << "\nSorry! Try Again...\n\n";
 
         pause;
 
@@ -602,14 +870,14 @@ void Signup()
 
     if(found)
     {
-        cout << "\nSorry! Username is not Available...";
+        cout << "\nSorry! Username is not Available...\n\n";
 
         pause;
     }
 
     else
     {
-        cout << "\nCongratulations! You Have Been Successfully Signed...";
+        cout << "\nCongratulations! You Have Been Successfully Signed...\n\n";
 
         WriteCredentials(username, passwd);
 
@@ -647,10 +915,6 @@ void MainWindow()
 
 int main()
 {
-    WaterMap();
-
-    EditWaterMap();
-
     MainWindow();
 
     return 0;
