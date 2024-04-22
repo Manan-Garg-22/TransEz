@@ -8,35 +8,41 @@ const ld Pi = 3.141592653589793238462643;
 const ld e = 2.718281828459045235360;
 const ll MOD = 1000000007;
 
-vector<pair<string, string>> Credentials;
+//Vector to store username password pairs
+vector<pair<string, string>> Credentials;    
 
+//Vector to represent water transportation network
 vector<vector<pair<ll, ll>>> Water;
 
+//Vector to represent air transportation network
 vector<vector<pair<ll, ll>>> Air;
 
+//Vector to represent land transportation network
 vector<vector<pair<ll, ll>>> Land;
 
+//Map to link the encrypted values with their original strings
 map<ll, string> mapping;
 
 #define pause system("pause")
-
 #define clear system("cls")
 
+//Function to encrypt string data
 ll Encrypt(string data)
 {
-    long long ModValue = 99991;
+    long long ModValue = 99991;   //Modulus value (prime) for handling overflow
 
     long long Encrypted = 0;
-    
+
+    //Loop through each character of the data string
     for(int x = 0 ; x < data.size() ; x++)
     {
-        ll factor = (abs(data[x] - 'a' + 1)) * pow((x+1), x);
+        ll factor = (abs(data[x] - 'a' + 1)) * pow((x+1), x);    //calculate factor for Encryption
         
         factor %= ModValue;
 
         Encrypted += factor;
 
-        Encrypted %= ModValue;
+        Encrypted %= ModValue;  //Handling Overflow
     }
 
     return Encrypted;
@@ -44,37 +50,38 @@ ll Encrypt(string data)
 
 void MainWindow();
 
+//Function to create water transportation network
 void createWaterMap()
 {
     Water.assign(2e5 + 1, vector<pair<ll, ll>> ());
 
-    ifstream file("water.txt");
+    ifstream file("water.txt");  //Open file for read operation using input file stream
 
     string word;
 
-    vector<string> info;
+    vector<string> info;  //Vector to store words from file
 
     ll temp = 0;
 
-    while(file >> word)
+    while(file >> word)     //Extract word from file until reach end of file
     {
         temp++;
 
         info.push_back(word);
 
-        if(temp % 4 == 0)
+        if(temp % 4 == 0)             //Add newline once 4 words are added
             info.push_back("\n");
     }
 
     for(ll x = 0 ; x < info.size() ; x += 5)
     {
-        ll encrypt1 = Encrypt(info[x + 1]);
-        ll encrypt2 = Encrypt(info[x + 2]);
+        ll encrypt1 = Encrypt(info[x + 1]); //Encrypt city 1
+        ll encrypt2 = Encrypt(info[x + 2]); //Encrypt city 2
 
-        mapping[encrypt1] = info[x + 1];
-        mapping[encrypt2] = info[x + 2];
+        mapping[encrypt1] = info[x + 1]; //Map Encrypted value to city 1
+        mapping[encrypt2] = info[x + 2]; //Map Encrypted value to city 2
 
-        Water[encrypt1].push_back(make_pair(encrypt2, stoi(info[x + 3])));
+        Water[encrypt1].push_back(make_pair(encrypt2, stoi(info[x + 3]))); //Connection between Encryption1 a
         Water[encrypt2].push_back(make_pair(encrypt1, stoi(info[x + 3])));
     }
 }
