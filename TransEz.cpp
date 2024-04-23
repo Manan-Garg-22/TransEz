@@ -81,24 +81,27 @@ void createWaterMap()
         mapping[encrypt1] = info[x + 1]; //Map Encrypted value to city 1
         mapping[encrypt2] = info[x + 2]; //Map Encrypted value to city 2
 
-        Water[encrypt1].push_back(make_pair(encrypt2, stoi(info[x + 3]))); //Connection between Encryption1 a
-        Water[encrypt2].push_back(make_pair(encrypt1, stoi(info[x + 3])));
+        Water[encrypt1].push_back(make_pair(encrypt2, stoi(info[x + 3]))); //Path from encrypted city 1 to city 2 with distance
+        Water[encrypt2].push_back(make_pair(encrypt1, stoi(info[x + 3]))); //Path from encrypted city 2 to city 1 with distance
     }
 }
 
+//Function to print water transportation network
 void PrintWaterMap()
 {
     createWaterMap();
 
     cout << endl << endl;
 
+    //Loop through all elements in Water vector
     for(ll x = 0 ; x < 2e5 + 1 ; x++)
     {
-        if(Water[x].empty())
+        if(Water[x].empty()) //If no connections for city x, continue
             continue;   
 
         cout << "Cities Connected With : " << mapping[x] << " : - \n\n";
 
+        //Loop through connections of city x and print them
         for(auto i : Water[x])
             cout << mapping[i.first] << " : " << i.second << " KiloMeters." << endl;
         cout << endl;
@@ -111,6 +114,7 @@ void PrintWaterMap()
     clear;
 }
 
+//Function to edit water transportation network
 void EditWaterMap()
 {
     createWaterMap();
@@ -127,7 +131,7 @@ void EditWaterMap()
 
     cin >> distance;
 
-    ifstream file("water.txt");
+    ifstream file("water.txt");  //Read file using input file stream
 
     string word;
 
@@ -135,7 +139,7 @@ void EditWaterMap()
 
     ll temp = 0;
 
-    while(file >> word)
+    while(file >> word)  //loop until reach end of file
     {
         temp++;
 
@@ -146,7 +150,7 @@ void EditWaterMap()
     }
 
 
-    ofstream file2("water.txt");
+    ofstream file2("water.txt");  //open file for write operation using output file stream
 
     for(auto i : info)
         file2 << i << ' ';
@@ -154,6 +158,7 @@ void EditWaterMap()
     file2 << "$ " << city1 << ' ' << city2 << ' ' << distance << "\n";
 }
 
+//Function to ffind the shortest path and distance between two cities
 void WaterRoute()
 {
     createWaterMap();
@@ -164,11 +169,11 @@ void WaterRoute()
 
     cin >> start >> destination;
 
-    queue<ll> q;
+    queue<ll> q;  //Queue to perform bfs
+ 
+    vector<bool> vis;  //Vector to mark visited nodes
 
-    vector<bool> vis;
-
-    vector<ll> lvl, predecessor;
+    vector<ll> lvl, predecessor; //Vectors to store level and predecessor information for nodes
 
     vis.assign(200001,false);
 
@@ -176,12 +181,13 @@ void WaterRoute()
 
     predecessor.assign(200001,0);
 
-    ll root = Encrypt(start);
+    ll root = Encrypt(start); //Convert start point to its corresponding numeric value
 
     q.push(root);
 
     vis[root] = true;
 
+    //Performing breadth-first search until the queue is empty
     while(!q.empty())
     {
         ll current = q.front();
@@ -190,40 +196,44 @@ void WaterRoute()
 
         vis[current] = true;
 
+        //Iterate over the neighbors of the current node in the 'Water' adjacency list
         for(auto neighbour : Water[current])
             if(!vis[neighbour.first])
             {
-                lvl[neighbour.first] = 1 + lvl[current];
+                lvl[neighbour.first] = 1 + lvl[current];  //Update the level of the neighbor to be one more than the current node's level
 
-                q.push(neighbour.first);
+                q.push(neighbour.first);  //Add the neighbor to the queue for further exploration
 
-                predecessor[neighbour.first] = current;
+                predecessor[neighbour.first] = current;  //Set the predecessor of the neighbor to be the current node
                 
-                vis[neighbour.first] = true;
+                vis[neighbour.first] = true;  //Mark the neighbor as visited
             }
     }
 
-    ll endd = Encrypt(destination);
+    ll endd = Encrypt(destination);  //Convert end point to its corresponding numeric value
     
     cout << endl << "Shortest Distance Between " << start << " & " << destination << " covers : " << lvl[endd] + 1 << " Locations. " << endl << endl;
 
-    vector <ll> path;
+    vector <ll> path; //Vector to store the shortest path from start to end points
 
-    path.push_back(endd);
+    path.push_back(endd); //Push the end point to the path vector
 
+    //Trace back the shortest path using predecessors
     while(predecessor[endd])
     {
         path.push_back(predecessor[endd]);
         endd = predecessor[endd];
     }
 
-    reverse(path.begin(), path.end());
+    reverse(path.begin(), path.end());  //Reverse the path vector to get the correct order
 
+    //Output the shortest path
     for(ll x = 0 ; x < path.size() ; x++)
         cout << x + 1 << ". " << mapping[path[x]] << endl << endl;        
 
+    //Calculate the total distance covered in the shortest path
     ll distanceTotal = 0;
-
+ 
     for(ll x = 0 ; x < path.size() - 1 ; x++)
         for(auto i : Water[path[x]])
             if(i.first == path[x + 1])
@@ -250,6 +260,7 @@ void WaterRoute()
 
     ll temp = 0;
 
+    //Read file until reach end of file
     while(file >> word)
     {
         temp++;
@@ -258,13 +269,15 @@ void WaterRoute()
     }
 
 
+    //Write the existing information back to the file
     ofstream file2(name);
-
+  
     for(auto i : info)
         file2 << i << ' ';
 
     file2 << "### Water :: ";
 
+    //Append the new water route information to the file
     for(auto i : path)
         file2 << mapping[i] << "-> ";
     
@@ -277,41 +290,47 @@ void WaterRoute()
     clear;
 }
 
+//Function to create Land Network
 void createLandMap()
 {
     Water.assign(2e5 + 1, vector<pair<ll, ll>> ());
 
-    ifstream file("land.txt");
+    ifstream file("land.txt"); //Open the 'land.txt' file for reading
 
     string word;
 
-    vector<string> info;
+    vector<string> info;  //Vector to store words read from the file
 
     ll temp = 0;
 
+    //Read words from the file
     while(file >> word)
     {
         temp++;
 
         info.push_back(word);
 
-        if(temp % 4 == 0)
+        if(temp % 4 == 0)          //If 4 words have been read, add a newline character to the 'info' vector
             info.push_back("\n");
     }
 
     for(ll x = 0 ; x < info.size() ; x += 5)
     {
+        //Encrypt the city names to numeric representations
         ll encrypt1 = Encrypt(info[x + 1]);
         ll encrypt2 = Encrypt(info[x + 2]);
 
+        //Map the numeric representations to the corresponding city names
         mapping[encrypt1] = info[x + 1];
         mapping[encrypt2] = info[x + 2];
 
+        //Add the connection between two cities and their distance to the 'Land' vector
         Land[encrypt1].push_back(make_pair(encrypt2, stoi(info[x + 3])));
         Land[encrypt2].push_back(make_pair(encrypt1, stoi(info[x + 3])));
     }
 }
 
+//Function to print the Land Network
 void PrintLandMap()
 {
     createLandMap();
@@ -320,11 +339,12 @@ void PrintLandMap()
 
     for(ll x = 0 ; x < 2e5 + 1 ; x++)
     {
-        if(Land[x].empty())
+        if(Land[x].empty())    //If connection of any city is empty, skip it
             continue;   
 
         cout << "Cities Connected With : " << mapping[x] << " : - \n\n";
 
+        //Output City 1 : City 2 and distance
         for(auto i : Water[x])
             cout << mapping[i.first] << " : " << i.second << " KiloMeters." << endl;
         cout << endl;
@@ -337,6 +357,7 @@ void PrintLandMap()
     clear;
 }
 
+//Function to edit Land transportation Network
 void EditLandMap()
 {
     createLandMap();
@@ -353,33 +374,35 @@ void EditLandMap()
 
     cin >> distance;
 
-    ifstream file("land.txt");
+    ifstream file("land.txt");  //Read file using input filestream
 
     string word;
 
-    vector<string> info;
+    vector<string> info;  //Vector to store words from the file
 
     ll temp = 0;
 
+    //Read file until reach end of file
     while(file >> word)
     {
         temp++;
 
         info.push_back(word);
 
-        if(temp % 4 == 0)
+        if(temp % 4 == 0)  //Newline character once a chunk of 4 words inserted into info vector
             info.push_back("\n");
     }
 
 
-    ofstream file2("land.txt");
+    ofstream file2("land.txt");   //Write operation into file
 
     for(auto i : info)
         file2 << i << ' ';
 
-    file2 << "$ " << city1 << ' ' << city2 << ' ' << distance << "\n";
+    file2 << "$ " << city1 << ' ' << city2 << ' ' << distance << "\n";   //Entering data into 'land.txt' file
 }
 
+///Function to find the shortest path and distance between two cities
 void LandRoute()
 {
     createLandMap();
@@ -390,24 +413,25 @@ void LandRoute()
 
     cin >> start >> destination;
 
-    queue<ll> q;
+    queue<ll> q;   //Queue to perform bfs
 
-    vector<bool> vis;
+    vector<bool> vis;  //Vector to mark visited nodes
 
-    vector<ll> lvl, predecessor;
-
+    vector<ll> lvl, predecessor;   //Vectors to store level and predecessor information for nodes
+ 
     vis.assign(200001,false);
 
     lvl.assign(200001,0);
 
     predecessor.assign(200001,0);
 
-    ll root = Encrypt(start);
+    ll root = Encrypt(start);  //Convert start point to its corresponding numeric value
 
-    q.push(root);
+    q.push(root);   //Push start node into Queue
 
-    vis[root] = true;
+    vis[root] = true;    //Mark start node as visited
 
+    //Performing breadth-first search until the queue is empty
     while(!q.empty())
     {
         ll current = q.front();
@@ -416,40 +440,44 @@ void LandRoute()
 
         vis[current] = true;
 
+        // Iterate over the neighbors of the current node in the 'Land' adjacency list
         for(auto neighbour : Land[current])
             if(!vis[neighbour.first])
             {
-                lvl[neighbour.first] = 1 + lvl[current];
+                lvl[neighbour.first] = 1 + lvl[current];  //Update the level of the neighbor to be one more than the current node's level
 
-                q.push(neighbour.first);
+                q.push(neighbour.first);  //Add the neighbor to the queue for further exploration
 
-                predecessor[neighbour.first] = current;
+                predecessor[neighbour.first] = current;  //Set the predecessor of the neighbor to be the current node
                 
-                vis[neighbour.first] = true;
+                vis[neighbour.first] = true;  //Mark the neighbor as visited
             }
     }
 
-    ll endd = Encrypt(destination);
+    ll endd = Encrypt(destination);  //Convert end point to its corresponding numeric value
     
     cout << endl << "Shortest Distance Between " << start << " & " << destination << " covers : " << lvl[endd] + 1 << " Locations. " << endl << endl;
 
-    vector <ll> path;
+    vector <ll> path;   //Vector to store the shortest path from start to end points
 
-    path.push_back(endd);
+    path.push_back(endd);  //Push the end point to the path vector
 
+    //Trace back the shortest path using predecessors
     while(predecessor[endd])
     {
         path.push_back(predecessor[endd]);
         endd = predecessor[endd];
     }
 
-    reverse(path.begin(), path.end());
+    reverse(path.begin(), path.end());   //Reverse the path vector
 
+    //Output the shortest path between two cities
     for(ll x = 0 ; x < path.size() ; x++)
         cout << x + 1 << ". " << mapping[path[x]] << endl << endl;        
 
     ll distanceTotal = 0;
 
+    //Calculate the total distance covered in the shortest path
     for(ll x = 0 ; x < path.size() - 1 ; x++)
         for(auto i : Land[path[x]])
             if(i.first == path[x + 1])
@@ -476,6 +504,7 @@ void LandRoute()
 
     ll temp = 0;
 
+    //Read file until reach end of file
     while(file >> word)
     {
         temp++;
@@ -486,11 +515,13 @@ void LandRoute()
 
     ofstream file2(name);
 
+    //Write the existing information back to the file  
     for(auto i : info)
         file2 << i << ' ';
 
     file2 << "### Land :: ";
 
+    //Append the new land route information to the file
     for(auto i : path)
         file2 << mapping[i] << "-> ";
     
@@ -503,54 +534,58 @@ void LandRoute()
     clear;
 }
 
+//Function to create air transportation network
 void createAirMap()
 {
     Air.assign(2e5 + 1, vector<pair<ll, ll>> ());
 
-    ifstream file("air.txt");
+    ifstream file("air.txt"); //Open file for read operation using input filestream
 
     string word;
 
-    vector<string> info;
+    vector<string> info;  //Vector to store words from the file
 
     ll temp = 0;
 
-    while(file >> word)
+    while(file >> word)  //Extract word from file until reach end of file
     {
         temp++;
 
         info.push_back(word);
 
-        if(temp % 4 == 0)
+        if(temp % 4 == 0)    //Add newline once 4 words are added into info vector
             info.push_back("\n");
     }
 
     for(ll x = 0 ; x < info.size() ; x += 5)
     {
-        ll encrypt1 = Encrypt(info[x + 1]);
-        ll encrypt2 = Encrypt(info[x + 2]);
+        ll encrypt1 = Encrypt(info[x + 1]);  //Encrypted city 1
+        ll encrypt2 = Encrypt(info[x + 2]);  //Encryoted city 2
 
-        mapping[encrypt1] = info[x + 1];
-        mapping[encrypt2] = info[x + 2];
+        mapping[encrypt1] = info[x + 1];  //Map Encrypted value to its corresponding city 1
+        mapping[encrypt2] = info[x + 2];  //Map Encrypted value to its corresponding city 2
 
-        Air[encrypt1].push_back(make_pair(encrypt2, stoi(info[x + 3])));
-        Air[encrypt2].push_back(make_pair(encrypt1, stoi(info[x + 3])));
-    }
+        Air[encrypt1].push_back(make_pair(encrypt2, stoi(info[x + 3])));  //Path from Encrypted city 1 to city 2 and distance between them
+        Air[encrypt2].push_back(make_pair(encrypt1, stoi(info[x + 3])));  //Path from Encrypted city 2 to city 1 and distance between them
+    } 
 }
 
+//Function to print Air transportation Network
 void PrintAirMap()
 {
     createAirMap();
         
     cout << endl << endl;
-    
+
+    //Loop through all the elements in Air Vector
     for(ll x = 0 ; x < 2e5 + 1 ; x++)
     {
-        if(Air[x].empty())
+        if(Air[x].empty())  //If no connection for city, skip it
             continue;   
 
         cout << "Cities Connected With : " << mapping[x] << " : - \n\n";
 
+        //Loop through connections of city and print them
         for(auto i : Air[x])
             cout << mapping[i.first] << " : " << i.second << " KiloMeters." << endl;
         cout << endl;
@@ -563,6 +598,7 @@ void PrintAirMap()
     clear;
 }
 
+//Function to edit Air Network
 void EditAirMap()
 {
     createAirMap();
@@ -579,7 +615,7 @@ void EditAirMap()
 
     cin >> distance;
 
-    ifstream file("air.txt");
+    ifstream file("air.txt");  //Read file
 
     string word;
 
@@ -587,7 +623,7 @@ void EditAirMap()
 
     ll temp = 0;
 
-    while(file >> word)
+    while(file >> word)  //Loop until end of the file
     {
         temp++;
 
@@ -598,14 +634,15 @@ void EditAirMap()
     }
 
 
-    ofstream file2("air.txt");
+    ofstream file2("air.txt");  //Open file for write operation
 
     for(auto i : info)
         file2 << i << ' ';
 
-    file2 << "$ " << city1 << ' ' << city2 << ' ' << distance << "\n";
+    file2 << "$ " << city1 << ' ' << city2 << ' ' << distance << "\n"; //Append city1, city2 and distance into file
 }
 
+//Function to find shortest distance and path route between two cities
 void AirRoute()
 {
     createAirMap();
@@ -616,11 +653,11 @@ void AirRoute()
 
     cin >> start >> destination;
 
-    queue<ll> q;
+    queue<ll> q;  //Queue for bfs
 
-    vector<bool> vis;
+    vector<bool> vis; //Vector to mark visited nodes
 
-    vector<ll> lvl, predecessor;
+    vector<ll> lvl, predecessor;  //Vectors to store level and predecessor information for nodes
 
     vis.assign(200001,false);
 
@@ -628,12 +665,13 @@ void AirRoute()
 
     predecessor.assign(200001,0);
 
-    ll root = Encrypt(start);
+    ll root = Encrypt(start);  //convert start point to its corresponding numeric value
 
     q.push(root);
 
     vis[root] = true;
 
+    //Perform bfs until queue is empty
     while(!q.empty())
     {
         ll current = q.front();
@@ -642,40 +680,44 @@ void AirRoute()
 
         vis[current] = true;
 
+        //Iterate over the neighbours of the current node in the 'Air' adjacency list
         for(auto neighbour : Air[current])
             if(!vis[neighbour.first])
             {
-                lvl[neighbour.first] = 1 + lvl[current];
+                lvl[neighbour.first] = 1 + lvl[current]; //Update the level of the neighbor to be one more than the current node's level
 
-                q.push(neighbour.first);
+                q.push(neighbour.first);  //Add the neighbor to the queue for further exploration
 
-                predecessor[neighbour.first] = current;
+                predecessor[neighbour.first] = current;  //Set the predecessor of the neighbor to be the current node
                 
-                vis[neighbour.first] = true;
+                vis[neighbour.first] = true;  //Mark the neighbor as visited
             }
     }
 
-        ll endd = Encrypt(destination);
+        ll endd = Encrypt(destination);  //convert end point to its corresponding numeric value
     
     cout << endl << "Shortest Distance Between " << start << " & " << destination << " covers : " << lvl[endd] + 1 << " Locations. " << endl << endl;
 
-    vector <ll> path;
+    vector <ll> path;  //Vector to store shortest path from start to end points
 
-    path.push_back(endd);
+    path.push_back(endd);  //Push end point to path vector
 
+    //Trace back the shortest path using predecessors
     while(predecessor[endd])
     {
         path.push_back(predecessor[endd]);
         endd = predecessor[endd];
     }
 
-    reverse(path.begin(), path.end());
+    reverse(path.begin(), path.end());  //Reverse the path vector
 
+    //Output the shortest path
     for(ll x = 0 ; x < path.size() ; x++)
         cout << x + 1 << ". " << mapping[path[x]] << endl << endl;        
 
     ll distanceTotal = 0;
 
+    //Calculate the total distance covered in the shortest path
     for(ll x = 0 ; x < path.size() - 1 ; x++)
         for(auto i : Air[path[x]])
             if(i.first == path[x + 1])
@@ -694,14 +736,15 @@ void AirRoute()
 
     name += ".txt";
 
-    ifstream file(name);
+    ifstream file(name);  //Open file
 
     string word;
 
     vector<string> info;
 
     ll temp = 0;
-
+    
+    //Read file until end of file
     while(file >> word)
     {
         temp++;
@@ -710,13 +753,14 @@ void AirRoute()
     }
 
 
-    ofstream file2(name);
+    ofstream file2(name);  //Open for write operation
 
     for(auto i : info)
         file2 << i << ' ';
 
     file2 << "### Air :: ";
 
+    //Append the new Air route information to the file
     for(auto i : path)
         file2 << mapping[i] << "-> ";
     
